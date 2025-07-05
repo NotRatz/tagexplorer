@@ -11,62 +11,67 @@
 
 <body>
   <div id="background-blur"></div>
-  <div id="tag-filter">
-    <input type="text" id="tag-search" placeholder="Type to filter tags..." />
-    <input type="text" id="artist-name-filter" placeholder="Filter by artist name...">
-    <div id="tag-buttons"></div>
-    <button id="clear-tags" style="display:none;">Clear All</button>
-  </div>
-  <div id="filtered-results"></div>
+  
+  <!-- Filter Section -->
+  <section id="tag-filter" class="filter-section">
+    <div class="filter-inputs">
+      <input type="text" id="tag-search" placeholder="Type to filter tags..." aria-label="Filter tags">
+      <input type="text" id="artist-name-filter" placeholder="Filter by artist name..." aria-label="Filter artists">
+    </div>
+    <div id="tag-buttons" class="tag-buttons-container"></div>
+    <button id="clear-tags" class="clear-button" style="display:none;">Clear All</button>
+  </section>
+
+  <!-- Results Section -->
+  <section id="filtered-results" class="results-section"></section>
 
   <!-- Copied Artists Sidebar -->
-  <div class="sidebar-wrapper">
-    <div id="copied-sidebar"></div>
+  <aside class="sidebar-wrapper">
+    <div id="copied-sidebar" class="copied-sidebar"></div>
+  </aside>
+
+  <!-- Main Gallery -->
+  <main id="artist-gallery" class="artist-gallery"></main>
+
+  <!-- Bubble Effects Container -->
+  <div id="jrpg-bubbles" class="bubbles-container"></div>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox-modal">
+    <button class="close-button">×</button>
+    <button id="prev-img" class="nav-button prev">◀</button>
+    <img id="lightbox-img" src="" alt="Artwork" class="lightbox-image">
+    <button id="next-img" class="nav-button next">▶</button>
+    <div id="lightbox-caption" class="lightbox-caption"></div>
   </div>
-
-  <div id="artist-gallery"></div>
-
-  <div id="jrpg-bubbles"></div>
-
-  <div id="lightbox">
-    <button class="close">×</button>
-    <button id="prev-img">◀</button>
-    <img id="lightbox-img" src="" alt="Artwork">
-    <button id="next-img">▶</button>
-    <div id="lightbox-caption"></div>
-  </div>
-
 
   <!-- Audio Control Panel -->
-  <div id="audio-panel" class="audio-panel hidden">
+  <section id="audio-panel" class="audio-panel hidden">
     <div class="audio-header">
       🎧 <span id="audio-track-name">No track playing</span>
     </div>
     <div class="audio-controls">
-      <button id="audio-prev">⏮️</button>
-      <button id="audio-toggle">⏯️</button>
-      <button id="audio-next">⏭️</button>
-      <button id="moan-mute">🔇 Moan</button>
+      <button id="audio-prev" aria-label="Previous track">⏮️</button>
+      <button id="audio-toggle" aria-label="Play/Pause">⏯️</button>
+      <button id="audio-next" aria-label="Next track">⏭️</button>
+      <button id="moan-mute" aria-label="Mute moans">🔇 Moan</button>
     </div>
-  </div>
+  </section>
 
-  <!-- Toggle Button -->
-  <button id="audio-panel-toggle" class="audio-toggle">🎵</button>
-  <button class="sidebar-toggle">🎀</button>
+  <!-- Control Buttons -->
+  <button id="audio-panel-toggle" class="audio-toggle" aria-label="Toggle audio panel">🎵</button>
+  <button class="sidebar-toggle" aria-label="Toggle copied artists sidebar">🎀</button>
 
   <!-- Moan Audio -->
   <audio id="moan-audio" preload="auto">
     <source src="moan.mp3" type="audio/mpeg">
   </audio>
-  
-  <button id="back-to-top" title="Back to top">↑</button>
-  <div class="floating-buttons">
-  <button class="audio-toggle">...</button>
-  <button class="sidebar-toggle">...</button>
-  </div>
+
   <!-- Hypnosis Audio -->
-  <audio id="hypnoAudio" preload="auto"></audio>
-  <script src="script.js"></script>
+  <audio id="hypno-audio" preload="auto"></audio>
+
+  <!-- Main Application Script -->
+  <script type="module" src="js/main.js"></script>
 </body>
 
 </html>
