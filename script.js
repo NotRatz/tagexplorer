@@ -749,6 +749,12 @@ if (typeof document !== "undefined") {
     async function filterArtists(reset = true) {
       if (reset) {
         artistGallery.innerHTML = "";
+        // Clear name element references when gallery is reset
+        filtered.forEach(artist => {
+          if (artist._nameElement) {
+            artist._nameElement = null;
+          }
+        });
         // Add spinner
         const spinner = document.createElement("div");
         spinner.className = "gallery-spinner";
@@ -813,9 +819,17 @@ if (typeof document !== "undefined") {
                   Array.isArray(posts) ? posts.map((post) => post.id) : []
                 );
                 artist._totalImageCount = uniqueIds.size;
+                // Re-render artist name if element exists
+                if (artist._nameElement) {
+                  renderArtistName(artist, artist._nameElement);
+                }
               })
               .catch(() => {
                 artist._totalImageCount = 0;
+                // Re-render artist name if element exists
+                if (artist._nameElement) {
+                  renderArtistName(artist, artist._nameElement);
+                }
               });
 
             // Fetch filtered count (artist + activeTags)
@@ -833,12 +847,24 @@ if (typeof document !== "undefined") {
                     Array.isArray(posts) ? posts.map((post) => post.id) : []
                   );
                   artist._imageCount = uniqueIds.size;
+                  // Re-render artist name if element exists
+                  if (artist._nameElement) {
+                    renderArtistName(artist, artist._nameElement);
+                  }
                 })
                 .catch(() => {
                   artist._imageCount = 0;
+                  // Re-render artist name if element exists
+                  if (artist._nameElement) {
+                    renderArtistName(artist, artist._nameElement);
+                  }
                 });
             } else {
               artist._imageCount = undefined;
+              // Re-render artist name if element exists
+              if (artist._nameElement) {
+                renderArtistName(artist, artist._nameElement);
+              }
             }
 
             return Promise.all([totalCountPromise, filteredCountPromise]);
@@ -852,6 +878,30 @@ if (typeof document !== "undefined") {
       }
 
       renderArtistsPage();
+    }
+
+    // Helper function to render artist name with counts
+    function renderArtistName(artist, nameElement) {
+      let nameText = `${artist.artistName} (${artist.nsfwLevel}${
+        artist.artStyle ? `, ${artist.artStyle}` : ""
+      })`;
+
+      if (
+        typeof artist._imageCount === "number" &&
+        typeof artist._totalImageCount === "number"
+      ) {
+        nameText += ` [${artist._imageCount}/${artist._totalImageCount}${
+          artist._totalImageCount === 1000 ? "+" : ""
+        }]`;
+      } else if (typeof artist._totalImageCount === "number") {
+        nameText += ` [${artist._totalImageCount}${
+          artist._totalImageCount === 1000 ? "+" : ""
+        }]`;
+      } else {
+        nameText += " [Loading count…]";
+      }
+
+      nameElement.textContent = nameText;
     }
 
     function renderArtistsPage() {
@@ -1005,59 +1055,12 @@ if (typeof document !== "undefined") {
 
         const name = document.createElement("div");
         name.className = "artist-name";
-        name.textContent = `${artist.artistName} (${artist.nsfwLevel}${
-          artist.artStyle ? `, ${artist.artStyle}` : ""
-        })`;
-
-        // --- Fix for delayed [Loading count…] and live update ---
-        if (
-          typeof artist._imageCount === "number" &&
-          typeof artist._totalImageCount === "number"
-        ) {
-          name.textContent += ` [${artist._imageCount}/${
-            artist._totalImageCount
-          }${artist._totalImageCount === 1000 ? "+" : ""}]`;
-        } else if (typeof artist._totalImageCount === "number") {
-          name.textContent += ` [${artist._totalImageCount}${
-            artist._totalImageCount === 1000 ? "+" : ""
-          }]`;
-        } else {
-          // Only define the property ONCE
-          if (!artist._countPropertyDefined) {
-            let loadingTimeout = setTimeout(() => {
-              if (typeof artist._imageCount !== "number") {
-                name.textContent += " [Loading count…]";
-              }
-            }, 400);
-
-            Object.defineProperty(artist, "_imageCount", {
-              set(val) {
-                clearTimeout(loadingTimeout);
-                this.__imageCount = val;
-                // Update the DOM node if it exists
-                if (typeof val === "number") {
-                  name.textContent = `${artist.artistName} (${
-                    artist.nsfwLevel
-                  }${artist.artStyle ? `, ${artist.artStyle}` : ""}) [${val}${
-                    val === 1000 ? "+" : ""
-                  }]`;
-                }
-              },
-              get() {
-                return this.__imageCount;
-              },
-              configurable: true,
-            });
-            artist._countPropertyDefined = true;
-          } else {
-            // If already defined, just set up the delayed loading message
-            setTimeout(() => {
-              if (typeof artist._imageCount !== "number") {
-                name.textContent += " [Loading count…]";
-              }
-            }, 1500);
-          }
-        }
+        
+        // Store reference to name element for updates
+        artist._nameElement = name;
+        
+        // Initial render of artist name with current count state
+        renderArtistName(artist, name);
 
         const copyBtn = document.createElement("button");
         copyBtn.className = "copy-button";
@@ -1097,9 +1100,13 @@ if (typeof document !== "undefined") {
                 Array.isArray(posts) ? posts.map((post) => post.id) : []
               );
               artist._totalImageCount = uniqueIds.size;
+              // Re-render artist name
+              renderArtistName(artist, name);
             })
             .catch(() => {
               artist._totalImageCount = 0;
+              // Re-render artist name
+              renderArtistName(artist, name);
             });
 
           let filteredCountPromise = Promise.resolve();
@@ -1116,36 +1123,23 @@ if (typeof document !== "undefined") {
                   Array.isArray(posts) ? posts.map((post) => post.id) : []
                 );
                 artist._imageCount = uniqueIds.size;
+                // Re-render artist name
+                renderArtistName(artist, name);
               })
               .catch(() => {
                 artist._imageCount = 0;
+                // Re-render artist name
+                renderArtistName(artist, name);
               });
           } else {
             artist._imageCount = undefined;
+            // Re-render artist name
+            renderArtistName(artist, name);
           }
 
           Promise.all([totalCountPromise, filteredCountPromise]).then(() => {
-            // Update the DOM after both counts are fetched
-            if (
-              typeof artist._imageCount === "number" &&
-              typeof artist._totalImageCount === "number"
-            ) {
-              name.textContent = `${artist.artistName} (${artist.nsfwLevel}${
-                artist.artStyle ? `, ${artist.artStyle}` : ""
-              }) [${artist._imageCount}/${artist._totalImageCount}${
-                artist._totalImageCount === 1000 ? "+" : ""
-              }]`;
-            } else if (typeof artist._totalImageCount === "number") {
-              name.textContent = `${artist.artistName} (${artist.nsfwLevel}${
-                artist.artStyle ? `, ${artist.artStyle}` : ""
-              }) [${artist._totalImageCount}${
-                artist._totalImageCount === 1000 ? "+" : ""
-              }]`;
-            } else {
-              name.textContent = `${artist.artistName} (${artist.nsfwLevel}${
-                artist.artStyle ? `, ${artist.artStyle}` : ""
-              }) [Loading count…]`;
-            }
+            // Re-render the artist name with updated counts
+            renderArtistName(artist, name);
           });
         };
 
