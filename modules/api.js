@@ -156,11 +156,17 @@ async function loadArtists() {
   return artistsCache;
 }
 
-export async function getArtistImageCount(artistName) {
-  const artists = await loadArtists();
-  const artist = artists.find((a) => a.artistName === artistName);
-  if (artist && typeof artist.postCount === "number") {
-    return artist.postCount;
+export async function getArtistImageCount(
+  artistName,
+  options = {}
+) {
+  const { forceFetch = false } = options;
+  if (!forceFetch) {
+    const artists = await loadArtists();
+    const artist = artists.find((a) => a.artistName === artistName);
+    if (artist && typeof artist.postCount === "number") {
+      return artist.postCount;
+    }
   }
   try {
     const resp = await fetchFn(
